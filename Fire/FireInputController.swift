@@ -34,6 +34,7 @@ class FireInputController: IMKInputController {
         didSet {
             if self.curPage != 1 {
                 // code被重新设置时，还原页码为1
+                // When the code is reset, restore the page number to 1
                 self.curPage = 1
                 self.markText()
                 return
@@ -41,6 +42,7 @@ class FireInputController: IMKInputController {
             NSLog("[FireInputController] original changed: \(self._originalString), refresh window")
 
             // 建议mark originalString, 否则在某些APP中会有问题
+            // It is recommended to mark originalString, otherwise there will be problems in some APPs
             self.markText()
 
             self._originalString.count > 0 ? self.refreshCandidatesWindow() : CandidatesWindow.shared.close()
@@ -96,10 +98,12 @@ class FireInputController: IMKInputController {
             return nil
         }
         // 只有在shift keyup时，才切换中英文输入, 否则会导致shift+[a-z]大写的功能失效
+        // Only when the shift key is up, switch between Chinese and English input, otherwise the function of shift+[a-z] capitalization will be invalid
         if Utils.shared.toggleInputModeKeyUpChecker.check(event) {
             NSLog("[FireInputController]toggle mode: \(inputMode)")
 
             // 把当前未上屏的原始code上屏处理
+            // Process the original code that is not currently on the screen
             insertText(_originalString)
 
             Fire.shared.toggleInputMode()
@@ -107,15 +111,19 @@ class FireInputController: IMKInputController {
             let text = inputMode == .zhhans ? "中" : "英"
 
             // 在输入坐标处，显示中英切换提示
+            // At the input coordinates, a Chinese-English switching prompt is displayed
             Utils.shared.toast?.show(text, position: getOriginPoint())
             return true
         }
         // 监听.flagsChanged事件只为切换中英文，其它情况不处理
+        // Listening to the .flagsChanged event is only for switching between Chinese and English, other cases are not processed
         // 当用户已经按下了非shift的修饰键时，不处理
+        // When the user has pressed a non-shift modifier key, do not handle
         if event.type == .flagsChanged ||
             (event.modifierFlags != .init(rawValue: 0) &&
              event.modifierFlags != .shift &&
             // 方向键的modifierFlags
+            // The modifierFlags of the arrow keys
              event.modifierFlags != .init(arrayLiteral: .numericPad, .function)
         ) {
             return false
@@ -125,6 +133,7 @@ class FireInputController: IMKInputController {
 
     private func enModeHandler(event: NSEvent) -> Bool? {
         // 英文输入模式, 不做任何处理
+        // English input mode, do not do any processing
         if inputMode == .enUS {
             return false
         }
@@ -150,6 +159,7 @@ class FireInputController: IMKInputController {
     private func deleteKeyHandler(event: NSEvent) -> Bool? {
         let keyCode = event.keyCode
         // 删除键删除字符
+        // Delete key to delete characters
         if keyCode == kVK_Delete {
             if _originalString.count > 0 {
                 _originalString = String(_originalString.dropLast())
@@ -162,9 +172,11 @@ class FireInputController: IMKInputController {
 
     private func punctuationKeyHandler(event: NSEvent) -> Bool? {
         // 获取输入的字符
+        // Get the character entered
         let string = event.characters!
 
         // 如果输入的字符是标点符号，转换标点符号为中文符号
+        // If the input characters are punctuation marks, convert the punctuation marks to Chinese symbols
         if inputMode == .zhhans, let result = Fire.shared.transformPunctuation(string) {
             insertText(result)
             return true
@@ -174,6 +186,7 @@ class FireInputController: IMKInputController {
 
     private func charKeyHandler(event: NSEvent) -> Bool? {
         // 获取输入的字符
+        // Get the character entered
         let string = event.characters!
 
         guard let reg = try? NSRegularExpression(pattern: "^[a-zA-Z]+$") else {
@@ -186,11 +199,13 @@ class FireInputController: IMKInputController {
         )
 
         // 当前没有输入非字符并且之前没有输入字符,不做处理
+        // No non-characters are currently entered and no characters have been entered before, no processing
         if  _originalString.count <= 0 && match == nil {
             NSLog("非字符,不做处理")
             return nil
         }
         // 当前输入的是英文字符,附加到之前
+        // The current input is an English character, which is appended to the front
         if match != nil {
             _originalString += string
 
@@ -201,8 +216,10 @@ class FireInputController: IMKInputController {
 
     private func numberKeyHandlder(event: NSEvent) -> Bool? {
         // 获取输入的字符
+        // Get the character entered
         let string = event.characters!
         // 当前输入的是数字,选择当前候选列表中的第N个字符 v
+        // The current input is a number, select the Nth character in the current candidate list v
         if let pos = Int(string), _originalString.count > 0 {
             let index = pos - 1
             if index < _candidates.count {
@@ -217,6 +234,7 @@ class FireInputController: IMKInputController {
 
     private func escKeyHandler(event: NSEvent) -> Bool? {
         // ESC键取消所有输入
+        // ESC key cancels all input
         if event.keyCode == kVK_Escape, _originalString.count > 0 {
             clean()
             return true
@@ -226,8 +244,10 @@ class FireInputController: IMKInputController {
 
     private func enterKeyHandler(event: NSEvent) -> Bool? {
         // 回车键输入原字符
+        // Enter key to enter the original character
         if event.keyCode == kVK_Return && _originalString.count > 0 {
             // 插入原字符
+            // Insert original character
             insertText(_originalString)
             return true
         }
@@ -236,6 +256,7 @@ class FireInputController: IMKInputController {
 
     private func spaceKeyHandler(event: NSEvent) -> Bool? {
         // 空格键输入转换后的中文字符
+        // Enter the converted Chinese characters with the space bar
         if event.keyCode == kVK_Space && _originalString.count > 0 {
             if let first = self._candidates.first {
                 insertCandidate(first)
@@ -249,6 +270,7 @@ class FireInputController: IMKInputController {
 
     override func recognizedEvents(_ sender: Any!) -> Int {
         // 当在当前应用下输入时　NSEvent.addGlobalMonitorForEvents 回调不会被调用，需要针对当前app, 使用原始的方式处理flagsChanged事件
+        // When inputting in the current application, the NSEvent.addGlobalMonitorForEvents callback will not be called, and the current app needs to use the original method to handle the flagsChanged event
         let isCurrentApp = client().bundleIdentifier() == Bundle.main.bundleIdentifier
         var events = NSEvent.EventTypeMask(arrayLiteral: .keyDown)
         if isCurrentApp {
@@ -283,10 +305,12 @@ class FireInputController: IMKInputController {
     }
 
     // 更新候选窗口
+    // update candidate window
     func refreshCandidatesWindow() {
         updateCandidates(client())
         if Defaults[.wubiAutoCommit] && _candidates.count == 1 && _originalString.count >= 4 {
             // 满4码唯一候选词自动上屏
+            // The only candidate word with 4 yards is automatically uploaded to the screen
             if let candidate = _candidates.first {
                 insertCandidate(candidate)
                 return
@@ -294,6 +318,7 @@ class FireInputController: IMKInputController {
         }
         if !Defaults[.showCodeInWindow] && _candidates.count <= 0 {
             // 不在候选框显示输入码时，如果候选词为空，则不显示候选框
+            // When the input code is not displayed in the candidate box, if the candidate word is empty, the candidate box will not be displayed
             CandidatesWindow.shared.close()
             return
         }
@@ -320,10 +345,12 @@ class FireInputController: IMKInputController {
             userInfo: [ "candidate": candidate ]
         )
         // 异步派发事件，防止阻塞当前线程
+        // Dispatch events asynchronously to prevent blocking the current thread
         NotificationQueue.default.enqueue(notification, postingStyle: .whenIdle)
     }
 
     // 往输入框插入当前字符
+    // Insert the current character into the input box
     func insertText(_ text: String) {
         NSLog("insertText: %@", text)
         let value = NSAttributedString(string: text)
@@ -332,6 +359,7 @@ class FireInputController: IMKInputController {
     }
 
     // 获取当前输入的光标位置
+    // Get the current input cursor position
     private func getOriginPoint() -> NSPoint {
         let xd: CGFloat = 0
         let yd: CGFloat = 4
