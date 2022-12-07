@@ -4,12 +4,12 @@ PODS:
   - NanoID (1.0.3)
   - Preferences (2.5.0)
   - Sparkle (1.26.0)
-  - SQLCipher (4.5.1):
-    - SQLCipher/standard (= 4.5.1)
-  - SQLCipher/common (4.5.1)
-  - SQLCipher/standard (4.5.1):
+  - SQLCipher (4.5.2):
+    - SQLCipher/standard (= 4.5.2)
+  - SQLCipher/common (4.5.2)
+  - SQLCipher/standard (4.5.2):
     - SQLCipher/common
-  - SwiftLint (0.47.1)
+  - SwiftLint (0.50.1)
 
 DEPENDENCIES:
   - Defaults
@@ -36,9 +36,9 @@ SPEC CHECKSUMS:
   NanoID: 060d290630f851ddd8fb0169ebfd7d44bd8670bd
   Preferences: a78dbe5c407afb66408a929d4708f8fd82abad85
   Sparkle: d56d028f4b0c123577825f5d1004f6140d77f90e
-  SQLCipher: 712e8416685e8e575b9b0706ffee71678b2fdcf8
-  SwiftLint: f80f1be7fa96d30e0aa68e58d45d4ea1ccaac519
+  SQLCipher: f5b4857434158b571a3ed3b10b3b43cd18ef5f67
+  SwiftLint: 6b0cf1f4d619808dbc16e4fab064ce6fc79f090b
 
-PODFILE CHECKSUM: 3675cd5596e2426de3e0330cb088ec63b9943d01
+PODFILE CHECKSUM: 7b6ce2a95769d6aabf4da1b5f94b5e12d387f970
 
 COCOAPODS: 1.11.3
