@@ -270,7 +270,8 @@ class FireInputController: IMKInputController {
 
     override func recognizedEvents(_ sender: Any!) -> Int {
         // 当在当前应用下输入时　NSEvent.addGlobalMonitorForEvents 回调不会被调用，需要针对当前app, 使用原始的方式处理flagsChanged事件
-        // When inputting in the current application, the NSEvent.addGlobalMonitorForEvents callback will not be called, and the current app needs to use the original method to handle the flagsChanged event
+        // When inputting in the current application, the NSEvent.addGlobalMonitorForEvents callback will not be called,
+        // and the current app needs to use the original method to handle the flagsChanged event
         let isCurrentApp = client().bundleIdentifier() == Bundle.main.bundleIdentifier
         var events = NSEvent.EventTypeMask(arrayLiteral: .keyDown)
         if isCurrentApp {

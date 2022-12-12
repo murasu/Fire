@@ -45,8 +45,13 @@ struct CandidateView: View {
         return HStack(alignment: .center, spacing: 2) {
             Text("\(index + 1).")
                 .foregroundColor(Color(indexColor))
-            Text(candidate.text)
-                .foregroundColor(Color(textColor))
+            VStack {
+                Text(candidate.text)
+                    .foregroundColor(Color(textColor))
+                Text("Annotation")
+                    .foregroundColor(.gray)
+                    .f
+            }
             if wubiCodeTip {
                 Text(getShownCode(candidate: candidate, origin: origin))
                     .foregroundColor(Color(codeColor))
